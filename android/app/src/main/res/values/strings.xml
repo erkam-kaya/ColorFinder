@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Color Finder</string>
+    <string name="title_activity_main">Color Finder</string>
+    <string name="package_name">com.colorfinder.app</string>
+    <string name="custom_url_scheme">com.colorfinder.app</string>
+</resources>
