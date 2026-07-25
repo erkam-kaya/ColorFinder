@@ -10,8 +10,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { RotateCcw, ArrowRight, User, Users, Lock, Sparkles, Award, Play, Crown, Monitor, Maximize, Smartphone, Heart, Volume2, HelpCircle, Download, Minimize, CheckCircle2 } from 'lucide-react';
-import { GameSettings } from '../types';
+import { RotateCcw, ArrowRight, User, Users, Lock, Sparkles, Award, Play, Crown, Monitor, Maximize, Smartphone, Heart, Volume2, HelpCircle, Download, Minimize, CheckCircle2, X } from 'lucide-react';
+import { GameStage, GameSettings } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { purchaseRemoveAds, purchaseSupport, checkIsPremium } from '../utils/ads';
 import { triggerHaptic, calculateScore } from '../utils/colorMath';
@@ -35,6 +35,7 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
   const [mode, setMode] = useState<'SINGLE' | 'MULTI'>('SINGLE');
   const [playerNames, setPlayerNames] = useState<string[]>(['Oyuncu 1', 'Oyuncu 2']);
   const [isLobbyOpen, setIsLobbyOpen] = useState(false);
+  const [isStoreOpen, setIsStoreOpen] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
 
   // Android-specific PWA and UI States
@@ -272,18 +273,15 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
         <div className="flex gap-4 w-full sm:w-auto justify-between sm:justify-end items-end">
           <div className="flex gap-2">
             {!isPremium && (
-              <button onClick={handleRemoveAds} className="bg-gradient-to-r from-amber-500 to-yellow-400 text-black px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-lg hover:scale-105 transition">
+              <button onClick={() => setIsStoreOpen(true)} className="bg-gradient-to-r from-amber-500 to-yellow-400 text-black px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-lg hover:scale-105 transition">
                 <Crown className="w-4 h-4" /> {t.removeAds}
               </button>
             )}
             {isPremium && (
-              <div className="bg-gradient-to-r from-yellow-600/20 to-amber-400/20 text-yellow-400 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 border border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)] backdrop-blur-sm">
+              <div className="bg-gradient-to-r from-yellow-600/20 to-amber-400/20 text-yellow-400 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 border border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)] backdrop-blur-sm cursor-pointer" onClick={() => setIsStoreOpen(true)}>
                 <Crown className="w-4 h-4 text-yellow-400 animate-pulse" /> {t.vipBadge}
               </div>
             )}
-            <button onClick={handleSupport} className="bg-gradient-to-r from-emerald-500 to-teal-400 text-black px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-lg hover:scale-105 transition hidden sm:flex">
-              <Heart className="w-4 h-4" /> {t.supportDev}
-            </button>
             <button onClick={() => setLanguage(language === 'TR' ? 'EN' : 'TR')} className="bg-slate-800 border border-slate-700 px-3 py-2 rounded-xl text-lg flex items-center justify-center hover:bg-slate-700 transition">
               {language === 'TR' ? '🇹🇷' : '🇬🇧'}
             </button>
@@ -617,6 +615,82 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
 
 
       </div>
+
+      {/* Store Modal */}
+      <AnimatePresence>
+        {isStoreOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={springTransition}
+            >
+              {/* Decorative background glow */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-gradient-to-b from-indigo-500/20 to-transparent pointer-events-none"></div>
+
+              <div className="flex justify-between items-center mb-6 relative z-10">
+                <div>
+                  <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white">{t.storeAndSupport}</h2>
+                  <p className="text-xs text-slate-400 font-mono mt-1">Uygulamayı geliştirerek daha iyi hale getirmemize yardımcı olun.</p>
+                </div>
+                <button 
+                  onClick={() => setIsStoreOpen(false)}
+                  className="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center transition-colors text-slate-300"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+                {/* Remove Ads Widget */}
+                <div className="bg-slate-950 border border-amber-500/30 rounded-2xl p-5 flex flex-col justify-between hover:border-amber-500/60 transition-colors group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-all"></div>
+                  <div>
+                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-300 rounded-xl flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
+                      <Crown className="w-6 h-6 text-black" />
+                    </div>
+                    <h3 className="text-lg font-black text-white uppercase">{t.removeAds}</h3>
+                    <p className="text-xs text-slate-400 mt-2 mb-6">Tüm reklamları kalıcı olarak kaldırır ve profilinizde şık bir VIP rozeti sergiler.</p>
+                  </div>
+                  
+                  {isPremium ? (
+                    <div className="w-full bg-slate-800 text-amber-400 py-3 rounded-xl font-black text-sm text-center uppercase tracking-wider flex items-center justify-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" /> {t.adsRemoved}
+                    </div>
+                  ) : (
+                    <button onClick={handleRemoveAds} className="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-black py-3 rounded-xl font-black text-sm uppercase tracking-wider hover:brightness-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+                      14.99 ₺ Satın Al
+                    </button>
+                  )}
+                </div>
+
+                {/* Support Developer Widget */}
+                <div className="bg-slate-950 border border-emerald-500/30 rounded-2xl p-5 flex flex-col justify-between hover:border-emerald-500/60 transition-colors group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all"></div>
+                  <div>
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-300 rounded-xl flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+                      <Heart className="w-6 h-6 text-black" />
+                    </div>
+                    <h3 className="text-lg font-black text-white uppercase">{t.supportDev}</h3>
+                    <p className="text-xs text-slate-400 mt-2 mb-6">Oyunun gelişimine doğrudan katkıda bulunun. Desteğiniz bizim için çok değerli!</p>
+                  </div>
+                  
+                  <button onClick={handleSupport} className="w-full bg-gradient-to-r from-emerald-500 to-teal-400 text-black py-3 rounded-xl font-black text-sm uppercase tracking-wider hover:brightness-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                    29.99 ₺ Satın Al
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Footer Branding */}
       <footer className="w-full text-center py-4 border-t border-slate-900 flex justify-between items-center text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em] max-w-5xl mx-auto mt-4">
