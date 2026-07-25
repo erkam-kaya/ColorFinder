@@ -2,13 +2,13 @@ import { AdMob, BannerAdOptions, BannerAdSize, BannerAdPosition, AdOptions } fro
 import { NativePurchases } from '@capgo/native-purchases';
 
 // --- ADMOB CONFIGURATION ---
-// IMPORTANT: Replace with your actual Ad Unit IDs before publishing to Play Store
-const bannerAdUnitId = 'ca-app-pub-3940256099942544/6300978111'; // Test Banner ID
-const interstitialAdUnitId = 'ca-app-pub-3940256099942544/1033173712'; // Test Interstitial ID
+const bannerAdUnitId = 'ca-app-pub-5363099307374159/7222578532'; // Production Banner ID
+const interstitialAdUnitId = 'ca-app-pub-5363099307374159/1725754987'; // Production Interstitial ID
 
 // --- IN-APP PURCHASES CONFIGURATION ---
 // The Product ID configured in Google Play Console
 export const REMOVE_ADS_PRODUCT_ID = 'remove_ads';
+export const SUPPORT_DEV_PRODUCT_ID = 'support_dev';
 
 let isPremiumUser = false;
 let adsInitialized = false;
@@ -43,7 +43,7 @@ export const initializeMonetization = async () => {
     if (!isPremiumUser) {
       await AdMob.initialize({
         requestTrackingAuthorization: true,
-        initializeForTesting: true, // Remove for production
+        initializeForTesting: false, // Production Mode
       });
       adsInitialized = true;
     }
@@ -61,7 +61,7 @@ export const showBannerAd = async () => {
     adSize: BannerAdSize.ADAPTIVE_BANNER,
     position: BannerAdPosition.BOTTOM_CENTER,
     margin: 0,
-    isTesting: true, // Remove for production
+    isTesting: false, // Production Mode
   };
   try {
     await AdMob.showBanner(options);
@@ -83,7 +83,7 @@ export const prepareInterstitialAd = async () => {
   if (isPremiumUser || !adsInitialized) return;
   const options: AdOptions = {
     adId: interstitialAdUnitId,
-    isTesting: true, // Remove for production
+    isTesting: false, // Production Mode
   };
   try {
     await AdMob.prepareInterstitial(options);
@@ -115,7 +115,22 @@ export const purchaseRemoveAds = async (): Promise<boolean> => {
     return false;
   } catch (error: any) {
     console.error('Purchase error', error);
-    // User probably cancelled
+    return false;
+  }
+};
+
+export const purchaseSupport = async (): Promise<boolean> => {
+  try {
+    const { transaction } = await NativePurchases.purchaseProduct({
+      productIdentifier: SUPPORT_DEV_PRODUCT_ID,
+    });
+    
+    if (transaction) {
+      return true;
+    }
+    return false;
+  } catch (error: any) {
+    console.error('Support Purchase error', error);
     return false;
   }
 };

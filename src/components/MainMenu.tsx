@@ -10,11 +10,11 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, Users, Play, Sparkles, Volume2, HelpCircle, Smartphone, Download, Maximize, Minimize, CheckCircle2, Crown } from 'lucide-react';
+import { RotateCcw, ArrowRight, User, Users, Lock, Sparkles, Award, Play, Crown, Monitor, Maximize, Smartphone, Heart, Volume2, HelpCircle, Download, Minimize, CheckCircle2 } from 'lucide-react';
 import { GameSettings } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
-import { purchaseRemoveAds, checkIsPremium } from '../utils/ads';
-import { triggerHaptic } from '../utils/colorMath';
+import { purchaseRemoveAds, purchaseSupport, checkIsPremium } from '../utils/ads';
+import { triggerHaptic, calculateScore } from '../utils/colorMath';
 
 interface MainMenuProps {
   onStartGame: (settings: GameSettings) => void;
@@ -27,6 +27,10 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
   const handleRemoveAds = async () => {
     const success = await purchaseRemoveAds();
     if (success) setIsPremium(true);
+  };
+
+  const handleSupport = async () => {
+    await purchaseSupport();
   };
   const [mode, setMode] = useState<'SINGLE' | 'MULTI'>('SINGLE');
   const [playerNames, setPlayerNames] = useState<string[]>(['Oyuncu 1', 'Oyuncu 2']);
@@ -221,7 +225,7 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
   const springTransition = { type: 'spring', stiffness: 260, damping: 20 };
 
   return (
-    <div id="main-menu-container" className="w-full min-h-screen flex flex-col justify-between px-4 sm:px-6 py-6 md:py-8 relative z-10 overflow-x-hidden">
+    <div id="main-menu-container" className="w-full h-full overflow-y-auto flex flex-col justify-between px-4 sm:px-6 py-6 md:py-8 relative z-10 overflow-x-hidden">
       {/* Intro Overlay Animation */}
       <AnimatePresence>
         {showIntro && (
@@ -273,10 +277,13 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
               </button>
             )}
             {isPremium && (
-              <div className="bg-slate-800 text-yellow-400 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 border border-yellow-500/30">
-                <Crown className="w-4 h-4" /> {t.adsRemoved}
+              <div className="bg-gradient-to-r from-yellow-600/20 to-amber-400/20 text-yellow-400 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 border border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)] backdrop-blur-sm">
+                <Crown className="w-4 h-4 text-yellow-400 animate-pulse" /> {t.vipBadge}
               </div>
             )}
+            <button onClick={handleSupport} className="bg-gradient-to-r from-emerald-500 to-teal-400 text-black px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-lg hover:scale-105 transition hidden sm:flex">
+              <Heart className="w-4 h-4" /> {t.supportDev}
+            </button>
             <button onClick={() => setLanguage(language === 'TR' ? 'EN' : 'TR')} className="bg-slate-800 border border-slate-700 px-3 py-2 rounded-xl text-lg flex items-center justify-center hover:bg-slate-700 transition">
               {language === 'TR' ? '🇹🇷' : '🇬🇧'}
             </button>
@@ -439,36 +446,7 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
           </div>
         </div>
 
-        {/* CARD 2: CONTROLS & SCIENCE (1 col, 1 row) */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-cyan-500/10 rounded flex items-center justify-center border border-cyan-500/20">
-              <HelpCircle className="w-5 h-5 text-cyan-400" />
-            </div>
-            <span className="font-bold text-xs uppercase tracking-wider text-slate-400">{t.systemPhases}</span>
-          </div>
-          <div className="space-y-3 my-2">
-            <div className="flex justify-between text-xs border-b border-slate-800 pb-1.5">
-              <span className="text-slate-400">{t.phase1}</span>
-              <span className="font-bold text-cyan-400 text-[10px] font-mono">{t.phase1Name}</span>
-            </div>
-            <div className="flex justify-between text-xs border-b border-slate-800 pb-1.5">
-              <span className="text-slate-400">{t.phase2}</span>
-              <span className="font-bold text-indigo-400 text-[10px] font-mono">{t.phase2Name}</span>
-            </div>
-            <div className="flex justify-between text-xs border-b border-slate-800 pb-1.5">
-              <span className="text-slate-400">{t.phase3}</span>
-              <span className="font-bold text-amber-400 text-[10px] font-mono">{t.phase3Name}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-slate-400">{t.engine}</span>
-              <span className="font-bold text-[#ff003c] text-[10px] font-mono">{t.engineName}</span>
-            </div>
-          </div>
-          <div className="text-[10px] text-slate-500 font-mono italic leading-normal">
-            {t.deltaNote}
-          </div>
-        </div>
+
 
         {/* CARD 3: PERFECT TARGET SCORE STATUS (1 col, 1 row) */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-xl">
@@ -482,8 +460,8 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
           </div>
         </div>
 
-        {/* CARD 4: LIVE SIMULATOR DEMO SHOWCASE (Spans 2 cols on desktop) */}
-        <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden shadow-xl">
+        {/* CARD 4: LIVE SIMULATOR DEMO SHOWCASE (Spans 3 cols on desktop) */}
+        <div className="md:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden shadow-xl">
           <div className="flex justify-between items-center border-b border-slate-800/80 pb-2 mb-4">
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#00f0ff] tracking-widest uppercase">
               <Sparkles className="w-4 h-4 text-cyan-400 animate-spin" />
@@ -497,127 +475,118 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-            {/* Target Color Display area */}
-            <div className="relative aspect-video sm:aspect-square rounded-xl overflow-hidden border border-slate-800 flex flex-col items-center justify-center bg-slate-950 shadow-inner">
-              {demoState === 'SPIN' && (
-                <div
-                  className="absolute inset-0 transition-all duration-150"
-                  style={{ backgroundColor: `rgb(${demoColor.r}, ${demoColor.g}, ${demoColor.b})` }}
-                />
-              )}
-              {demoState === 'BURN' && (
-                <div
-                  className="absolute inset-0"
-                  style={{ backgroundColor: `rgb(${demoColor.r}, ${demoColor.g}, ${demoColor.b})` }}
-                />
-              )}
-              {demoState === 'GUESS' && (
-                <div className="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-2 text-center">
-                  <span className="text-[10px] text-neutral-400 font-sans font-bold uppercase tracking-widest">{t.memoryPhase}</span>
-                  <span className="text-[8px] text-neutral-500 font-mono mt-1">{t.colorSaved}</span>
+          <div className="flex flex-col gap-4 items-center justify-center w-full max-w-lg mx-auto py-2">
+            {/* Split Color Display area */}
+            <div className="w-full aspect-video sm:aspect-[2/1] rounded-xl overflow-hidden border-2 border-slate-700 flex bg-slate-950 shadow-inner relative">
+              {/* Left Side (Target Color) */}
+              <div className="w-1/2 h-full flex flex-col relative border-r border-slate-800">
+                {(demoState === 'SPIN' || demoState === 'BURN' || demoState === 'GUESS' || demoState === 'REVEAL') && (
+                  <div
+                    className={`absolute inset-0 transition-all ${demoState === 'SPIN' ? 'duration-150' : 'duration-300'}`}
+                    style={{ backgroundColor: `rgb(${demoColor.r}, ${demoColor.g}, ${demoColor.b})` }}
+                  />
+                )}
+                {/* Always-on Label for Left Side */}
+                <div className="absolute bottom-2 left-0 w-full flex justify-center">
+                  <span className="bg-slate-950/70 text-slate-200 px-2 py-0.5 rounded text-[9px] font-bold font-mono tracking-widest uppercase backdrop-blur-sm">
+                    HEDEF
+                  </span>
                 </div>
-              )}
-              {demoState === 'REVEAL' && (
-                <div className="absolute inset-0 flex">
-                  <div className="w-1/2 h-full" style={{ backgroundColor: `rgb(${demoColor.r}, ${demoColor.g}, ${demoColor.b})` }} />
-                  <div className="w-1/2 h-full" style={{ backgroundColor: `rgb(${demoSliders.r}, ${demoSliders.g}, ${demoSliders.b})` }} />
+              </div>
+
+              {/* Right Side (Guess Color) */}
+              <div className="w-1/2 h-full flex flex-col relative">
+                {(demoState === 'GUESS' || demoState === 'REVEAL') ? (
+                  <div
+                    className="absolute inset-0 transition-all duration-75"
+                    style={{ backgroundColor: `rgb(${demoSliders.r}, ${demoSliders.g}, ${demoSliders.b})` }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center">
+                    <span className="text-xl text-neutral-400 font-sans font-black uppercase tracking-widest">?</span>
+                  </div>
+                )}
+                {/* Always-on Label for Right Side */}
+                <div className="absolute bottom-2 left-0 w-full flex justify-center">
+                  <span className="bg-slate-950/70 text-[#00f0ff] px-2 py-0.5 rounded text-[9px] font-bold font-mono tracking-widest uppercase backdrop-blur-sm">
+                    TAHMİN
+                  </span>
+                </div>
+              </div>
+
+              {/* Center Live Score Badge */}
+              {(demoState === 'GUESS' || demoState === 'REVEAL') && (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-950/90 border-2 border-slate-700 rounded-full w-16 h-16 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.8)] backdrop-blur-md z-20">
+                  <span className="text-xl font-black text-white tabular-nums leading-none">
+                    {calculateScore(demoColor, demoSliders).toFixed(1)}
+                  </span>
+                  <span className="text-[8px] text-slate-400 font-bold tracking-widest mt-0.5">/ 10</span>
                 </div>
               )}
 
               {/* Simulated Timer line (State 2) */}
               {demoState === 'BURN' && (
-                <div className="absolute top-0 left-0 h-1 bg-[#00f0ff] animate-[melt_3s_linear_forwards] w-full" />
+                <div className="absolute top-0 left-0 h-1 bg-[#00f0ff] animate-[melt_3s_linear_forwards] w-full z-10" />
               )}
-
-              <div className="z-10 bg-slate-950/80 border border-slate-800 px-2.5 py-1 rounded-md text-[9px] font-bold text-white backdrop-blur-sm uppercase tracking-wider font-mono">
-                {demoState === 'SPIN' && t.step1}
-                {demoState === 'BURN' && t.step2}
-                {demoState === 'GUESS' && t.step3}
-                {demoState === 'REVEAL' && t.step4}
-              </div>
-            </div>
-
-            {/* Slider Controls Display area */}
-            <div className="space-y-2.5 py-1">
-              {/* Red slider */}
-              <div className="space-y-0.5">
-                <div className="flex justify-between text-[8px] font-bold font-mono">
-                  <span className="text-[#ff525c]">{t.red}</span>
-                  <span className="text-neutral-400">{demoSliders.r}</span>
-                </div>
-                <div className="h-4 bg-slate-950 border border-slate-800 rounded-full relative overflow-hidden flex items-center px-1">
-                  <div
-                    className="h-1.5 rounded-full bg-gradient-to-r from-transparent to-[#ff525c]/45 transition-all"
-                    style={{ width: `${(demoSliders.r / 255) * 100}%` }}
-                  />
-                  <div
-                    className="w-2.5 h-2.5 rounded-full bg-white absolute shadow-[0_0_8px_rgba(255,82,92,0.8)] transition-all"
-                    style={{ left: `calc(${(demoSliders.r / 255) * 90}% + 4px)` }}
-                  />
-                </div>
-              </div>
-
-              {/* Green slider */}
-              <div className="space-y-0.5">
-                <div className="flex justify-between text-[8px] font-bold font-mono">
-                  <span className="text-green-400">{t.green}</span>
-                  <span className="text-neutral-400">{demoSliders.g}</span>
-                </div>
-                <div className="h-4 bg-slate-950 border border-slate-800 rounded-full relative overflow-hidden flex items-center px-1">
-                  <div
-                    className="h-1.5 rounded-full bg-gradient-to-r from-transparent to-green-500/45 transition-all"
-                    style={{ width: `${(demoSliders.g / 255) * 100}%` }}
-                  />
-                  <div
-                    className="w-2.5 h-2.5 rounded-full bg-white absolute shadow-[0_0_8px_rgba(34,197,94,0.8)] transition-all"
-                    style={{ left: `calc(${(demoSliders.g / 255) * 90}% + 4px)` }}
-                  />
-                </div>
-              </div>
-
-              {/* Blue slider */}
-              <div className="space-y-0.5">
-                <div className="flex justify-between text-[8px] font-bold font-mono">
-                  <span className="text-[#00f0ff]">{t.blue}</span>
-                  <span className="text-neutral-400">{demoSliders.b}</span>
-                </div>
-                <div className="h-4 bg-slate-950 border border-slate-800 rounded-full relative overflow-hidden flex items-center px-1">
-                  <div
-                    className="h-1.5 rounded-full bg-gradient-to-r from-transparent to-[#00f0ff]/45 transition-all"
-                    style={{ width: `${(demoSliders.b / 255) * 100}%` }}
-                  />
-                  <div
-                    className="w-2.5 h-2.5 rounded-full bg-white absolute shadow-[0_0_8px_rgba(0,240,255,0.8)] transition-all"
-                    style={{ left: `calc(${(demoSliders.b / 255) * 90}% + 4px)` }}
-                  />
-                </div>
-              </div>
             </div>
           </div>
 
-          {/* Simulated accuracy score reveal banner */}
-          <AnimatePresence>
-            {demoState === 'REVEAL' && (
-              <motion.div
-                className="bg-gradient-to-r from-[#00f0ff]/10 to-indigo-500/10 border border-indigo-500/20 rounded-xl p-2.5 text-center text-xs font-mono flex items-center justify-between mt-4"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={springTransition}
-              >
-                <div className="text-left">
-                  <div className="text-[9px] text-neutral-400 font-sans uppercase font-bold tracking-wider">{t.perfectMatchRate}</div>
-                  <div className="font-extrabold text-white text-xs">{t.deviationTolerance}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-[18px] font-black text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]">
-                    9.4 <span className="text-xs text-neutral-500">/ 10</span>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Slider Controls Display area (Restored for simulation) */}
+          <div className="w-full max-w-xl mx-auto mt-6 space-y-2.5 py-1">
+            {/* Red slider */}
+            <div className="space-y-0.5">
+              <div className="flex justify-between text-[8px] font-bold font-mono">
+                <span className="text-[#ff525c]">{t.red}</span>
+                <span className="text-neutral-400">{demoSliders.r}</span>
+              </div>
+              <div className="h-4 bg-slate-950 border border-slate-800 rounded-full relative overflow-hidden flex items-center px-1">
+                <div
+                  className="h-1.5 rounded-full bg-gradient-to-r from-transparent to-[#ff525c]/45 transition-all"
+                  style={{ width: `${(demoSliders.r / 255) * 100}%` }}
+                />
+                <div
+                  className="w-2.5 h-2.5 rounded-full bg-white absolute shadow-[0_0_8px_rgba(255,82,92,0.8)] transition-all"
+                  style={{ left: `calc(${(demoSliders.r / 255) * 90}% + 4px)` }}
+                />
+              </div>
+            </div>
+
+            {/* Green slider */}
+            <div className="space-y-0.5">
+              <div className="flex justify-between text-[8px] font-bold font-mono">
+                <span className="text-green-400">{t.green}</span>
+                <span className="text-neutral-400">{demoSliders.g}</span>
+              </div>
+              <div className="h-4 bg-slate-950 border border-slate-800 rounded-full relative overflow-hidden flex items-center px-1">
+                <div
+                  className="h-1.5 rounded-full bg-gradient-to-r from-transparent to-green-500/45 transition-all"
+                  style={{ width: `${(demoSliders.g / 255) * 100}%` }}
+                />
+                <div
+                  className="w-2.5 h-2.5 rounded-full bg-white absolute shadow-[0_0_8px_rgba(34,197,94,0.8)] transition-all"
+                  style={{ left: `calc(${(demoSliders.g / 255) * 90}% + 4px)` }}
+                />
+              </div>
+            </div>
+
+            {/* Blue slider */}
+            <div className="space-y-0.5">
+              <div className="flex justify-between text-[8px] font-bold font-mono">
+                <span className="text-[#00f0ff]">{t.blue}</span>
+                <span className="text-neutral-400">{demoSliders.b}</span>
+              </div>
+              <div className="h-4 bg-slate-950 border border-slate-800 rounded-full relative overflow-hidden flex items-center px-1">
+                <div
+                  className="h-1.5 rounded-full bg-gradient-to-r from-transparent to-[#00f0ff]/45 transition-all"
+                  style={{ width: `${(demoSliders.b / 255) * 100}%` }}
+                />
+                <div
+                  className="w-2.5 h-2.5 rounded-full bg-white absolute shadow-[0_0_8px_rgba(0,240,255,0.8)] transition-all"
+                  style={{ left: `calc(${(demoSliders.b / 255) * 90}% + 4px)` }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* CARD 5: CHROMATIC SCIENCE & TIPS (1 col, 1 row) */}
@@ -645,66 +614,7 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
           </div>
         </div>
 
-        {/* CARD 6: ANDROID INTEGRATION CENTER (1 col, 1 row) */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between shadow-xl relative overflow-hidden">
-          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-[#00f0ff]/5 rounded-full blur-2xl" />
-          
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#00f0ff]/10 rounded flex items-center justify-center border border-[#00f0ff]/20">
-                <Smartphone className="w-5 h-5 text-[#00f0ff]" />
-              </div>
-              <span className="font-extrabold text-xs uppercase tracking-wider text-slate-400">{t.androidIntegration}</span>
-            </div>
 
-            <div className="space-y-2.5">
-              {/* Fullscreen controller */}
-              <button
-                onClick={toggleFullscreen}
-                className="w-full flex items-center justify-between p-2.5 bg-slate-950/60 hover:bg-slate-950 border border-slate-800/85 rounded-xl text-xs transition-all text-left group cursor-pointer"
-              >
-                <span className="text-slate-300 font-sans group-hover:text-white transition-colors">{t.fullscreen}</span>
-                {isFullscreen ? (
-                  <Minimize className="w-4 h-4 text-[#ff003c]" />
-                ) : (
-                  <Maximize className="w-4 h-4 text-[#00f0ff]" />
-                )}
-              </button>
-
-              {/* Haptic controller */}
-              <button
-                onClick={toggleHaptic}
-                className="w-full flex items-center justify-between p-2.5 bg-slate-950/60 hover:bg-slate-950 border border-slate-800/85 rounded-xl text-xs transition-all text-left cursor-pointer"
-              >
-                <span className="text-slate-300 font-sans">{t.haptic}</span>
-                <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded ${
-                  isHapticEnabled 
-                    ? 'bg-[#00f0ff]/15 text-[#00f0ff] border border-[#00f0ff]/25' 
-                    : 'bg-slate-800 text-slate-500 border border-slate-700/50'
-                }`}>
-                  {isHapticEnabled ? '{t.on}' : '{t.off}'}
-                </span>
-              </button>
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-slate-800/80 mt-4">
-            {isPwaInstalled ? (
-              <div className="flex items-center gap-2 text-xs bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2 text-emerald-400">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <div className="font-sans font-bold">{t.appReady}</div>
-              </div>
-            ) : (
-              <button
-                onClick={handleInstallClick}
-                className="w-full bg-gradient-to-r from-slate-950 to-slate-900 border border-slate-800 hover:border-[#00f0ff]/40 text-white font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all hover:shadow-[0_0_15px_rgba(0,240,255,0.15)] text-xs font-mono tracking-wider cursor-pointer"
-              >
-                <Download className="w-4 h-4 text-[#00f0ff]" />
-                <span>{t.installApp}</span>
-              </button>
-            )}
-          </div>
-        </div>
 
       </div>
 

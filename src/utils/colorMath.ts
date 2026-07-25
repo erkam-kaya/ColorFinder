@@ -120,34 +120,36 @@ export function calculateScore(target: RGBColor, guess: RGBColor): number {
 }
 
 /**
- * Generates an optimal target color that is vibrant and fun to guess.
- * Avoids pure black, white, or highly muted grays for better gameplay.
+ * Generates a target color from the full sRGB gamut.
+ * Uses HSV to ensure vibrant and highly distinct colors, avoiding muddy or repetitive grays.
  */
+let lastHue = Math.floor(Math.random() * 360);
 export function generateTargetColor(): RGBColor {
-  // We want to generate colors with reasonable lightness and saturation.
-  // We can do this in RGB by ensuring there's a good spread between components
-  // and components aren't all low (dark) or all high (light).
-  let r = 0, g = 0, b = 0;
-  let attempts = 0;
+  // Jump around the color wheel to ensure consecutive colors feel very different
+  lastHue = (lastHue + 137.5 + (Math.random() * 60 - 30)) % 360; 
+  const h = lastHue;
+  const s = 40 + Math.random() * 60; // 40-100 saturation
+  const v = 40 + Math.random() * 60; // 40-100 brightness
+  return hsvToRgb(h, s, v);
+}
 
-  while (attempts < 50) {
-    r = Math.floor(Math.random() * 216) + 30; // 30-245
-    g = Math.floor(Math.random() * 216) + 30;
-    b = Math.floor(Math.random() * 216) + 30;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const diff = max - min;
-    const avg = (r + g + b) / 3;
-
-    // Check if the color has enough chromatic spread (not too gray) and is in standard brightness range
-    if (diff > 45 && avg > 60 && avg < 200) {
-      break;
-    }
-    attempts++;
+/**
+ * Returns dynamic rank/title based on final average score.
+ */
+export function getFinalRank(avgScore: number, lang: 'TR' | 'EN'): string {
+  if (lang === 'TR') {
+    if (avgScore >= 9.5) return 'Efsanevi Renk Ustası';
+    if (avgScore >= 9.0) return 'Kromatik Şampiyon';
+    if (avgScore >= 8.0) return 'Renk Avcısı';
+    if (avgScore >= 6.5) return 'Algı Çaylağı';
+    return 'Renk Körü Adayı';
+  } else {
+    if (avgScore >= 9.5) return 'Legendary Color Master';
+    if (avgScore >= 9.0) return 'Chromatic Champion';
+    if (avgScore >= 8.0) return 'Color Hunter';
+    if (avgScore >= 6.5) return 'Perception Rookie';
+    return 'Colorblind Candidate';
   }
-
-  return { r, g, b };
 }
 
 /**
@@ -176,3 +178,83 @@ export function triggerHaptic(duration = 20): void {
   }
 }
 
+/**
+ * Converts HSV (Hue 0-360, Saturation 0-100, Value 0-100) to RGB.
+ */
+export function hsvToRgb(h: number, s: number, v: number): RGBColor {
+  h = ((h % 360) + 360) % 360;
+  const sN = Math.max(0, Math.min(100, s)) / 100;
+  const vN = Math.max(0, Math.min(100, v)) / 100;
+
+  const c = vN * sN;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = vN - c;
+
+  let rC = 0, gC = 0, bC = 0;
+  if (h < 60) { rC = c; gC = x; }
+  else if (h < 120) { rC = x; gC = c; }
+  else if (h < 180) { gC = c; bC = x; }
+  else if (h < 240) { gC = x; bC = c; }
+  else if (h < 300) { rC = x; bC = c; }
+  else { rC = c; bC = x; }
+
+  return {
+    r: Math.round((rC + m) * 255),
+    g: Math.round((gC + m) * 255),
+    b: Math.round((bC + m) * 255)
+  };
+}
+
+export function rgbToHsv(r: number, g: number, b: number) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0, v = max;
+  const d = max - min;
+  s = max === 0 ? 0 : d / max;
+  if (max !== min) {
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return { h: Math.round(h * 360), s: Math.round(s * 100), v: Math.round(v * 100) };
+}
+
+/**
+ * Returns an approximate Turkish color name based on HSV values.
+ */
+export function getColorNameTR(h: number, s: number, v: number): string {
+  if (s < 8) {
+    if (v < 15) return 'Siyah';
+    if (v < 35) return 'Koyu Gri';
+    if (v < 65) return 'Gri';
+    if (v < 85) return 'Açık Gri';
+    return 'Beyaz';
+  }
+
+  let name = '';
+  const hN = ((h % 360) + 360) % 360;
+  if (hN < 10 || hN >= 350) name = 'Kırmızı';
+  else if (hN < 25) name = 'Kızıl Turuncu';
+  else if (hN < 42) name = 'Turuncu';
+  else if (hN < 55) name = 'Sarı Turuncu';
+  else if (hN < 70) name = 'Sarı';
+  else if (hN < 85) name = 'Lime Yeşili';
+  else if (hN < 150) name = 'Yeşil';
+  else if (hN < 170) name = 'Camgöbeği';
+  else if (hN < 195) name = 'Açık Mavi';
+  else if (hN < 230) name = 'Mavi';
+  else if (hN < 260) name = 'Lacivert';
+  else if (hN < 290) name = 'Mor';
+  else if (hN < 320) name = 'Fuşya';
+  else name = 'Pembe';
+
+  if (v < 30) return 'Koyu ' + name;
+  if (s < 30 && v > 70) return 'Pastel ' + name;
+  if (s > 80 && v > 70) return 'Canlı ' + name;
+  if (v > 85 && s < 50) return 'Açık ' + name;
+
+  return name;
+}

@@ -28,7 +28,7 @@ export default function App() {
 
   return (
     // pb-16 added to avoid overlapping with bottom banner ad
-    <div id="app-root-container" className="min-h-screen bg-slate-950 text-slate-100 overflow-y-auto font-sans relative pb-16">
+    <div id="app-root-container" className="h-[100dvh] bg-slate-950 text-slate-100 overflow-hidden font-sans relative pb-[60px]">
       {/* 1. Cinematic Fluid background animation */}
       <BackgroundShader />
 

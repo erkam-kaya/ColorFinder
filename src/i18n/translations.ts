@@ -9,7 +9,7 @@ export const translations = {
     systemReady: 'SİSTEM HAZIR',
     chapter1: 'BÖLÜM 01: ALGILAMA VE HAFIZA',
     heroTitle: 'MÜKEMMEL TONU\nEZBERE YAKALA',
-    heroDesc: 'Color Finder, insan gözünün renk sapmalarına duyarlılığını test eden bilimsel bir kromatik analiz oyunudur. Hedef rengi 3 saniye inceleyin, ardından kırmızı, yeşil ve mavi kanallarını eşleyerek en düşük Delta E sapmasını elde edin!',
+    heroDesc: 'Color Finder, insan gözünün renk sapmalarına duyarlılığını test eden bilimsel bir kromatik analiz oyunudur. Hedef rengi 5 saniye inceleyin, ardından kırmızı, yeşil ve mavi kanallarını eşleyerek en düşük Delta E sapmasını elde edin!',
     singlePlayer: 'TEK OYUNCU',
     singlePlayerDesc: 'Gözlerini test et.',
     singleBadge: 'TEKİL',
@@ -42,7 +42,7 @@ export const translations = {
     memoryPhase: 'Hafıza Fazı',
     colorSaved: 'Renk Saklandı',
     step1: '1. DÖNDÜR',
-    step2: '2. EZBERLE (3S)',
+    step2: '2. EZBERLE (5S)',
     step3: '3. TAHMİN ET',
     step4: '4. SKOR!',
     red: 'KIRMIZI',
@@ -70,8 +70,13 @@ export const translations = {
     demoVersion: 'TEMSİLİ SÜRÜM: [BENTO GRID]',
     
     // In-App Purchase
+    storeAndSupport: 'MAĞAZA VE DESTEK',
+    supportDev: 'Geliştiriciye Destek Ol',
+    supportDevDesc: 'Oyunu geliştirmemize yardımcı olun!',
     removeAds: 'REKLAMLARI KALDIR',
     adsRemoved: 'REKLAMSIZ VERSİYON',
+    vipBadge: 'VIP ÜYE',
+    vipDesc: 'Reklamlar kapatıldı.',
 
     // Game Screen
     giveUp: 'Vazgeç',
@@ -81,7 +86,7 @@ export const translations = {
     spinSub: 'Slot motoru rastgele bir ton kilitliyor.',
     chromaticRoulette: 'KROMATİK RULET',
     burnLabel: 'HAFIZAYA KAZI!',
-    timerStarted: '3 SANİYE BAŞLADI',
+    timerStarted: '5 SANİYE BAŞLADI',
     guessSpectrum: 'TAHMİN TAYFINIZ',
     guideCard: 'KILAVUZ KARTI',
     chromaticTargets: 'Kromatik Hedefler',
@@ -124,7 +129,7 @@ export const translations = {
     systemReady: 'SYSTEM READY',
     chapter1: 'CHAPTER 01: PERCEPTION & MEMORY',
     heroTitle: 'CATCH THE PERFECT\nTONE BY HEART',
-    heroDesc: 'Color Finder is a scientific chromatic analysis game that tests the sensitivity of the human eye to color deviations. Study the target color for 3 seconds, then match the RGB channels to get the lowest Delta E deviation!',
+    heroDesc: 'Color Finder is a scientific chromatic analysis game that tests the sensitivity of the human eye to color deviations. Study the target color for 5 seconds, then match the RGB channels to get the lowest Delta E deviation!',
     singlePlayer: 'SINGLE PLAYER',
     singlePlayerDesc: 'Test your eyes.',
     singleBadge: 'SOLO',
@@ -157,7 +162,7 @@ export const translations = {
     memoryPhase: 'Memory Phase',
     colorSaved: 'Color Saved',
     step1: '1. SPIN',
-    step2: '2. BURN (3S)',
+    step2: '2. BURN (5S)',
     step3: '3. GUESS',
     step4: '4. SCORE!',
     red: 'RED',
@@ -185,8 +190,13 @@ export const translations = {
     demoVersion: 'REPRESENTATIVE VERSION: [BENTO GRID]',
     
     // In-App Purchase
+    storeAndSupport: 'STORE & SUPPORT',
+    supportDev: 'Support the Developer',
+    supportDevDesc: 'Help us improve the game!',
     removeAds: 'REMOVE ADS',
     adsRemoved: 'AD-FREE VERSION',
+    vipBadge: 'VIP MEMBER',
+    vipDesc: 'Ads have been removed.',
 
     // Game Screen
     giveUp: 'Give Up',
@@ -196,7 +206,7 @@ export const translations = {
     spinSub: 'The slot engine is locking a random tone.',
     chromaticRoulette: 'CHROMATIC ROULETTE',
     burnLabel: 'BURN TO MEMORY!',
-    timerStarted: '3 SECONDS STARTED',
+    timerStarted: '5 SECONDS STARTED',
     guessSpectrum: 'YOUR GUESS SPECTRUM',
     guideCard: 'GUIDE CARD',
     chromaticTargets: 'Chromatic Targets',
