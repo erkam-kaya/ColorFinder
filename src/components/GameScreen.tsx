@@ -9,7 +9,7 @@ import { RotateCcw, ArrowRight, User, Users, Lock, Sparkles, Award, BarChart3, A
 import { GameStage, GameSettings, Player, RGBColor } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { prepareInterstitialAd, showInterstitialAd, checkIsPremium } from '../utils/ads';
-import { generateTargetColor, calculateScore, rgbToHex, getTurkishFeedback, calculateDeltaE, triggerHaptic, hsvToRgb, getColorNameTR, rgbToHsv, getFinalRank } from '../utils/colorMath';
+import { generateTargetColor, calculateScore, rgbToHex, getFeedback, calculateDeltaE, triggerHaptic, hsvToRgb, getColorNameTR, rgbToHsv, getFinalRank } from '../utils/colorMath';
 
 interface GameScreenProps {
   settings: GameSettings;
@@ -327,7 +327,7 @@ export default function GameScreen({ settings, onQuit }: GameScreenProps) {
   const springTransition = { type: 'spring', stiffness: 220, damping: 18 };
 
   return (
-    <div id="game-canvas" className="w-full h-[100dvh] flex flex-col justify-between px-4 sm:px-6 py-4 md:py-8 pb-[60px] pt-[env(safe-area-inset-top)] relative z-10 overflow-hidden bg-slate-950 text-slate-100">
+    <div id="game-canvas" className="w-full h-full flex flex-col justify-between px-4 sm:px-6 py-4 md:py-8 pt-[env(safe-area-inset-top)] relative z-10 overflow-hidden bg-slate-950 text-slate-100">
       {/* HUD Header info bar - wide bento layout */}
       <header className="w-full max-w-5xl mx-auto flex justify-between items-center bg-slate-900/90 border border-slate-800 rounded-2xl px-4 py-3 md:px-6 md:py-4 shadow-xl backdrop-blur-xl mb-4 md:mb-6">
         <button
@@ -438,10 +438,9 @@ export default function GameScreen({ settings, onQuit }: GameScreenProps) {
                 <div className="absolute inset-0 bg-slate-950/60 rounded-[32px] border border-slate-800 shadow-[0_25px_50px_rgba(0,0,0,0.6)]" />
 
                 <div
-                  className="w-[84%] h-[84%] rounded-2xl z-10 overflow-hidden relative border border-slate-800/55"
+                  className="w-[84%] h-[84%] rounded-2xl z-10 overflow-hidden relative border-4 border-slate-800"
                   style={{
-                    backgroundColor: `rgb(${targetColor.r}, ${targetColor.g}, ${targetColor.b})`,
-                    boxShadow: `0 0 50px rgba(${targetColor.r}, ${targetColor.g}, ${targetColor.b}, 0.35), inset 0 2px 10px rgba(255,255,255,0.1)`
+                    backgroundColor: `rgb(${targetColor.r}, ${targetColor.g}, ${targetColor.b})`
                   }}
                 >
                   {/* Subtle inner reflection */}
@@ -676,8 +675,9 @@ export default function GameScreen({ settings, onQuit }: GameScreenProps) {
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center space-y-1.5 shadow-lg">
                   <span className="font-mono text-[9px] text-slate-400 uppercase tracking-widest font-extrabold">{t.chromaticDecision}</span>
                   <p className="font-sans font-black text-white text-base">
-                    {getTurkishFeedback(
-                      players[settings.mode === 'MULTI' ? revealIndex : currentPlayerIdx].scores[currentRound - 1] ?? 0
+                    {getFeedback(
+                      players[settings.mode === 'MULTI' ? revealIndex : currentPlayerIdx].scores[currentRound - 1] ?? 0,
+                      language
                     )}
                   </p>
                   <p className="font-mono text-[10px] text-slate-400 bg-slate-950/50 inline-block px-3 py-1 rounded-full border border-slate-800/60">

@@ -121,13 +121,11 @@ export function calculateScore(target: RGBColor, guess: RGBColor): number {
 
 /**
  * Generates a target color from the full sRGB gamut.
- * Uses HSV to ensure vibrant and highly distinct colors, avoiding muddy or repetitive grays.
+ * Uses HSV to ensure vibrant and highly distinct colors.
  */
-let lastHue = Math.floor(Math.random() * 360);
 export function generateTargetColor(): RGBColor {
-  // Jump around the color wheel to ensure consecutive colors feel very different
-  lastHue = (lastHue + 137.5 + (Math.random() * 60 - 30)) % 360; 
-  const h = lastHue;
+  // Completely random hue for chromatic roulette so it doesn't get stuck in similar palettes
+  const h = Math.floor(Math.random() * 360);
   const s = 40 + Math.random() * 60; // 40-100 saturation
   const v = 40 + Math.random() * 60; // 40-100 brightness
   return hsvToRgb(h, s, v);
@@ -141,28 +139,42 @@ export function getFinalRank(avgScore: number, lang: 'TR' | 'EN'): string {
     if (avgScore >= 9.5) return 'Efsanevi Renk Ustası';
     if (avgScore >= 9.0) return 'Kromatik Şampiyon';
     if (avgScore >= 8.0) return 'Renk Avcısı';
-    if (avgScore >= 6.5) return 'Algı Çaylağı';
+    if (avgScore >= 7.0) return 'Amatör Renkşinas';
+    if (avgScore >= 5.5) return 'Algı Çaylağı';
+    if (avgScore >= 4.0) return 'Acemi Boyacı';
     return 'Renk Körü Adayı';
   } else {
     if (avgScore >= 9.5) return 'Legendary Color Master';
     if (avgScore >= 9.0) return 'Chromatic Champion';
     if (avgScore >= 8.0) return 'Color Hunter';
-    if (avgScore >= 6.5) return 'Perception Rookie';
+    if (avgScore >= 7.0) return 'Amateur Colorist';
+    if (avgScore >= 5.5) return 'Perception Rookie';
+    if (avgScore >= 4.0) return 'Novice Painter';
     return 'Colorblind Candidate';
   }
 }
 
 /**
- * Returns Turkish feedback text based on accuracy score.
+ * Returns feedback text based on accuracy score and language.
  */
-export function getTurkishFeedback(score: number): string {
-  if (score >= 9.8) return 'OLAĞANÜSTÜ! Kusursuz Gözler!';
-  if (score >= 9.5) return 'MÜKEMMEL! Müthiş bir algı!';
-  if (score >= 9.0) return 'HARİKA! Çok az fark kaldı!';
-  if (score >= 8.0) return 'ÇOK İYİ! Yaklaştın!';
-  if (score >= 6.5) return 'FENA DEĞİL! Tonu yakaladın sayılır.';
-  if (score >= 4.0) return 'DURUMU KURTARIR! Biraz daha çalışmalısın.';
-  return 'GÖZLERİNİ BİLEYİN! Hafızanı zorlamalısın.';
+export function getFeedback(score: number, lang: 'TR' | 'EN'): string {
+  if (lang === 'TR') {
+    if (score >= 9.8) return 'OLAĞANÜSTÜ! Kusursuz Gözler!';
+    if (score >= 9.5) return 'MÜKEMMEL! Müthiş bir algı!';
+    if (score >= 9.0) return 'HARİKA! Çok az fark kaldı!';
+    if (score >= 8.0) return 'ÇOK İYİ! Yaklaştın!';
+    if (score >= 6.5) return 'FENA DEĞİL! Tonu yakaladın sayılır.';
+    if (score >= 4.0) return 'DURUMU KURTARIR! Biraz daha çalışmalısın.';
+    return 'GÖZLERİNİ BİLEYİN! Hafızanı zorlamalısın.';
+  } else {
+    if (score >= 9.8) return 'EXTRAORDINARY! Flawless Eyes!';
+    if (score >= 9.5) return 'PERFECT! Amazing perception!';
+    if (score >= 9.0) return 'GREAT! Very close!';
+    if (score >= 8.0) return 'VERY GOOD! Getting there!';
+    if (score >= 6.5) return 'NOT BAD! You caught the tone.';
+    if (score >= 4.0) return 'PASSABLE! Needs more practice.';
+    return 'SHARPEN YOUR EYES! Challenge your memory.';
+  }
 }
 
 /**

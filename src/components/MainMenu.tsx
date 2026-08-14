@@ -11,10 +11,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RotateCcw, ArrowRight, User, Users, Lock, Sparkles, Award, Play, Crown, Monitor, Maximize, Smartphone, Heart, Volume2, HelpCircle, Download, Minimize, CheckCircle2, X } from 'lucide-react';
-import { GameStage, GameSettings } from '../types';
+import { GameSettings } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { purchaseRemoveAds, purchaseSupport, checkIsPremium } from '../utils/ads';
 import { triggerHaptic, calculateScore } from '../utils/colorMath';
+import LogoImage from '../assets/images/logo_chromatic_android_1784487119437.jpg';
 
 interface MainMenuProps {
   onStartGame: (settings: GameSettings) => void;
@@ -23,10 +24,14 @@ interface MainMenuProps {
 export default function MainMenu({ onStartGame }: MainMenuProps) {
   const { t, language, setLanguage } = useLanguage();
   const [isPremium, setIsPremium] = useState(checkIsPremium());
+  const [isPremiumState, setIsPremiumState] = useState(checkIsPremium());
   
   const handleRemoveAds = async () => {
     const success = await purchaseRemoveAds();
-    if (success) setIsPremium(true);
+    if (success) {
+      setIsPremiumState(true);
+      alert(t.adsRemoved);
+    }
   };
 
   const handleSupport = async () => {
@@ -243,10 +248,8 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 120 }}
             >
-              <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-[#00f0ff] to-[#4f2eff] p-[2px] flex items-center justify-center animate-pulse mb-6 shadow-[0_0_50px_rgba(0,240,255,0.4)]">
-                <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#00f0ff] via-indigo-600 to-[#4f2eff]" />
-                </div>
+              <div className="w-32 h-32 rounded-full p-[2px] flex items-center justify-center animate-pulse mb-6 shadow-[0_0_50px_rgba(0,240,255,0.4)] bg-gradient-to-tr from-[#00f0ff] to-[#4f2eff]">
+                <img src={LogoImage} alt="Color Finder Logo" className="w-full h-full object-cover rounded-full" />
               </div>
               <h1 className="font-sans font-black text-4xl tracking-tighter text-white uppercase italic">
                 {t.gameTitle.split(" ")[0]} <span className="text-[#00f0ff] drop-shadow-[0_0_15px_rgba(0,240,255,0.6)]">{t.gameTitle.split(" ")[1]}</span>
@@ -272,12 +275,12 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
         </div>
         <div className="flex gap-4 w-full sm:w-auto justify-between sm:justify-end items-end">
           <div className="flex gap-2">
-            {!isPremium && (
+            {!isPremiumState && (
               <button onClick={() => setIsStoreOpen(true)} className="bg-gradient-to-r from-amber-500 to-yellow-400 text-black px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-lg hover:scale-105 transition">
                 <Crown className="w-4 h-4" /> {t.removeAds}
               </button>
             )}
-            {isPremium && (
+            {isPremiumState && (
               <div className="bg-gradient-to-r from-yellow-600/20 to-amber-400/20 text-yellow-400 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 border border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)] backdrop-blur-sm cursor-pointer" onClick={() => setIsStoreOpen(true)}>
                 <Crown className="w-4 h-4 text-yellow-400 animate-pulse" /> {t.vipBadge}
               </div>
@@ -660,13 +663,13 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
                     <p className="text-xs text-slate-400 mt-2 mb-6">Tüm reklamları kalıcı olarak kaldırır ve profilinizde şık bir VIP rozeti sergiler.</p>
                   </div>
                   
-                  {isPremium ? (
+                  {isPremiumState ? (
                     <div className="w-full bg-slate-800 text-amber-400 py-3 rounded-xl font-black text-sm text-center uppercase tracking-wider flex items-center justify-center gap-2">
                       <CheckCircle2 className="w-4 h-4" /> {t.adsRemoved}
                     </div>
                   ) : (
                     <button onClick={handleRemoveAds} className="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-black py-3 rounded-xl font-black text-sm uppercase tracking-wider hover:brightness-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-                      14.99 ₺ Satın Al
+                      17.99 ₺ SATIN AL
                     </button>
                   )}
                 </div>
@@ -683,7 +686,7 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
                   </div>
                   
                   <button onClick={handleSupport} className="w-full bg-gradient-to-r from-emerald-500 to-teal-400 text-black py-3 rounded-xl font-black text-sm uppercase tracking-wider hover:brightness-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                    29.99 ₺ Satın Al
+                    35.99 ₺ DESTEK OL
                   </button>
                 </div>
               </div>
